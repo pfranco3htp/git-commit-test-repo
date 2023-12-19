@@ -16,9 +16,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Configure Git Safe Directory
-        run: git config --global --add safe.directory /github/workspace
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -26,13 +23,18 @@ jobs:
           aws-secret-access-key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
 
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+
+      - name: Set up Git credentials for CodeCommit
+        run: |
+          git config --global credential.helper '!aws codecommit credential-helper $@'
+          git config --global credential.UseHttpPath true
+
       - name: Push to CodeCommit
         run: |
-          git -c credential.helper='' -c credential.UseHttpPath=true credential approve <<EOF
-          protocol=https
-          host=git-codecommit.us-west-2.amazonaws.com
-          username=${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
-          password=${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
-          EOF
           git remote add codecommit https://git-codecommit.us-west-2.amazonaws.com/v1/repos/git-commit-test-repo
           git push codecommit HEAD:main
