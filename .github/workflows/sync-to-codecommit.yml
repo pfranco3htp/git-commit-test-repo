@@ -23,12 +23,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
 
-      - name: Install AWS CLI
-        run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
-
       - name: Set up Git credentials for CodeCommit
         run: |
           git config --global credential.helper '!aws codecommit credential-helper $@'
